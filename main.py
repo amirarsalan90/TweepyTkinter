@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import font
 import tweepy
+import sqlite3
 
 # def print_tweet(stuff):
 #     return 'User: %s \n%s\n\n' %(stuff.author.screen_name, stuff.text)
@@ -17,7 +18,48 @@ import tweepy
 #     for i in range(COUNT):
 #         text.insert(tk.END, print_tweet(stuff[i]))
 
-HEIGHT = 200
+
+
+def NextUser():
+   try:
+      global user_number
+      user_number += 1
+      conn = sqlite3.connect("users.db")
+      c = conn.cursor()
+      username = c.execute("select User from users where rowid = ?",[user_number])
+      result = username.fetchall()
+      conn.close()
+      label.config(text="user number %d:\n %s"%(user_number,result[0][0]))
+      label2.config(text="")
+   except:
+      label2.configure(text="This is the last user! press previous!")
+
+
+def PreviousUser():
+   try:
+      global user_number
+      user_number -= 1
+      conn = sqlite3.connect("users.db")
+      c = conn.cursor()
+      username = c.execute("select User from users where rowid = ?",[user_number])
+      result = username.fetchall()
+      conn.close()
+      label.config(text="user number %d:\n %s"%(user_number,result[0][0]))
+      label2.config(text="")
+   except:
+      label2.configure(text="This is the first user! press next!")
+
+
+
+conn = sqlite3.connect("users.db")
+c = conn.cursor()
+user_number = 1
+first_user = c.execute("select User from users where rowid = ?",[user_number])
+result = first_user.fetchall()
+conn.close()
+initial_text = result[0][0]
+
+HEIGHT = 400
 WIDTH = 800
 
 root = tk.Tk()
@@ -27,34 +69,63 @@ canvas.pack()
 frame = tk.Frame(root)
 frame.place(relx = 0.5, rely = 0, relwidth=1, relheight=1, anchor="n")
 
-text = tk.Text(frame, font=('Times', 13), wrap="word")
-text.place(relx = 0.5, rely = 0.2, relwidth = 0.4, relheight = 0.1, anchor = "n")
-
-button = tk.Button(frame, text="previous", font=('Times', 13), command= lambda: NextUser)
-button.place(relx=0.2, rely=0.2, relwidth=0.1, relheight=0.1,anchor="n")
-
-button = tk.Button(frame, text="next", font=('Times', 13), command= lambda: NextUser)
-button.place(relx=0.8, rely=0.2, relwidth=0.1, relheight=0.1,anchor="n")
+label = tk.Label(frame, font=('Times', 13), bg="#99ccff", text="user number 1:\n %s" %initial_text)
+label.place(relx = 0.5, rely = 0.2, relwidth = 0.4, relheight = 0.3, anchor = "n")
 
 
-def sel():
-   selection = "You selected the option " + str(var.get())
-   label.config(text = selection)
+button1 = tk.Button(frame, text="next", font=('Times', 13), command= lambda: NextUser())
+button1.place(relx=0.8, rely=0.2, relwidth=0.1, relheight=0.1,anchor="n")
 
-var = tk.IntVar()
-R1 = tk.Radiobutton(root, text="Option 1", variable=var, value=1, command=sel)
-R1.place(relx=0.5, rely=0.6, relwidth=0.1, relheight=0.09, anchor="n")
+button2 = tk.Button(frame, text="previous", font=('Times', 13), command= lambda: PreviousUser())
+button2.place(relx=0.2, rely=0.2, relwidth=0.1, relheight=0.1,anchor="n")
 
 
-R2 = tk.Radiobutton(root, text="Option 2", variable=var, value=2, command=sel)
-R2.place(relx=0.5, rely=0.8, relwidth=0.1, relheight=0.09, anchor="n")
+#def sel():
+#   selection = "You selected the option " + str(var.get())
+#   label.config(text = selection)
 
-label = tk.Label(root)
-label.pack()
 
+def set_stance(value):
+
+   global user_number
+
+   if value == "Anti":
+      conn = sqlite3.connect("users.db")
+      c = conn.cursor()
+      c.execute("update users set AntiOrPro=? where rowid = ?",[value, user_number])
+      conn.commit()
+      c.close()
+   elif value == "Pro":
+      conn = sqlite3.connect("users.db")
+      c = conn.cursor()
+      c.execute("update users set AntiOrPro=? where rowid = ?", [value, user_number])
+      conn.commit()
+      c.close()
+
+
+var = tk.StringVar()
+
+R1 = tk.Radiobutton(root, text="Anti-Brexit", variable=var, value="Anti")
+R1.place(relx=0.5, rely=0.6, relwidth=0.15, relheight=0.09, anchor="n")
+
+
+R2 = tk.Radiobutton(root, text="Pro-Brexit", variable=var, value="Pro")
+R2.place(relx=0.5, rely=0.8, relwidth=0.15, relheight=0.09, anchor="n")
+
+button3 = tk.Button(frame, text="Apply", font=('Times', 13), command=lambda: set_stance(var.get()))
+button3.place(relx=0.7, rely=0.65, relwidth=0.1, relheight=0.2, anchor="n")
+
+label2 = tk.Label()
+label2.config(text=var.get())
+label2.pack(side="bottom")
 
 root.mainloop()
 
+
+
+#sqlite syntaxes:
+#select * from users where User = "StevenJT22";
+#update users set AntiOrPro = "Pro" where User = "StevenJT22";
 
 
 
