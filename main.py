@@ -1,24 +1,12 @@
 import tkinter as tk
 from tkinter import font
-import tweepy
 import sqlite3
-
-# def print_tweet(stuff):
-#     return 'User: %s \n%s\n\n' %(stuff.author.screen_name, stuff.text)
-#
-#
-# def get_tweet(user):
-#     text.delete('1.0', tk.END)
-#     COUNT=10
-#     auth = tweepy.OAuthHandler("Q4XzAOy6MsUblE5GbVgvcYPmD", "Lhm3Epvi6bJZuGZgbnGtH2fmQhDoFVfCehuh4T4HXsKlQwmI3D")
-#     auth.set_access_token("1152350802880684033-w3NpbaVq39EyMMU4gKknvJUX8EyP8k",
-#                           "QrzLllhCkVAQ0D8nBTOXD9BzYQUls5TDcKgsJ3pgEcezv")
-#     api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
-#     stuff = api.user_timeline(screen_name=user, count=COUNT)
-#     for i in range(COUNT):
-#         text.insert(tk.END, print_tweet(stuff[i]))
+import webbrowser
 
 
+
+def callback(url):
+   webbrowser.open_new_tab(url)
 
 def NextUser():
    try:
@@ -30,9 +18,11 @@ def NextUser():
       result = username.fetchall()
       conn.close()
       label.config(text="user number %d:\n %s"%(user_number,result[0][0]))
-      #label2.config(text="")
+      label2.config(text="twitter.com/%s"%result[0][0])
+      label2.bind("<Button-1>", lambda e: callback("http://www.twitter.com/%s"%result[0][0]))
+
    except:
-      label2.configure(text="This is the last user! press previous!")
+      label3.configure(text="This is the last user! press previous!")
 
 
 def PreviousUser():
@@ -45,9 +35,11 @@ def PreviousUser():
       result = username.fetchall()
       conn.close()
       label.config(text="user number %d:\n %s"%(user_number,result[0][0]))
-      #label2.config(text="")
+      label2.config(text="twitter.com/%s" % result[0][0])
+      label2.bind("<Button-1>", lambda e: callback("http://www.twitter.com/%s" % result[0][0]))
+
    except:
-      label2.configure(text="This is the first user! press next!")
+      label3.configure(text="This is the first user! press next!")
 
 
 
@@ -80,6 +72,7 @@ initial_text = result[0][0]
 HEIGHT = 400
 WIDTH = 800
 
+
 root = tk.Tk()
 canvas = tk.Canvas(root, height=HEIGHT, width=WIDTH)
 canvas.pack()
@@ -87,29 +80,48 @@ canvas.pack()
 frame = tk.Frame(root)
 frame.place(relx = 0.5, rely = 0, relwidth=1, relheight=1, anchor="n")
 
-label = tk.Label(frame, font=('Times', 13), bg="#99ccff", text="user number 1:\n %s" %initial_text)
+label = tk.Label(frame, font=('Helvetica', 15), bg="#99ccff", text="user number 1:\n %s" %initial_text)
 label.place(relx = 0.5, rely = 0.2, relwidth = 0.4, relheight = 0.3, anchor = "n")
 
 
-button1 = tk.Button(frame, text="next", font=('Times', 13), command= lambda: NextUser())
-button1.place(relx=0.8, rely=0.2, relwidth=0.1, relheight=0.1,anchor="n")
+button1 = tk.Button(frame, text="next", font=('Times', 15), command= lambda: NextUser())
+button1.place(relx=0.8, rely=0.2, relwidth=0.12, relheight=0.1,anchor="n")
 
-button2 = tk.Button(frame, text="previous", font=('Times', 13), command= lambda: PreviousUser())
-button2.place(relx=0.2, rely=0.2, relwidth=0.1, relheight=0.1,anchor="n")
+button2 = tk.Button(frame, text="previous", font=('Times', 15), command= lambda: PreviousUser())
+button2.place(relx=0.2, rely=0.2, relwidth=0.12, relheight=0.1,anchor="n")
 
 
 var = tk.StringVar()
 
-R1 = tk.Radiobutton(root, text="Anti-Brexit", variable=var, value="Anti")
-R1.place(relx=0.5, rely=0.6, relwidth=0.15, relheight=0.09, anchor="n")
+label2 = tk.Label(frame, fg="blue", cursor="hand2")
+label2.place(relx=0.5, rely=0.5, relwidth=0.4, relheight=0.09, anchor="n")
+
+R1 = tk.Radiobutton(root, text="Anti-Brexit", font=('Times', 12), variable=var, value="Anti")
+R1.place(relx=0.5, rely=0.7, relwidth=0.15, relheight=0.09, anchor="n")
 
 
-R2 = tk.Radiobutton(root, text="Pro-Brexit", variable=var, value="Pro")
+R2 = tk.Radiobutton(root, text="Pro-Brexit", font=('Times', 12), variable=var, value="Pro")
 R2.place(relx=0.5, rely=0.8, relwidth=0.15, relheight=0.09, anchor="n")
 
 button3 = tk.Button(frame, text="Apply", font=('Times', 13), command=lambda: set_stance(var.get()))
-button3.place(relx=0.7, rely=0.65, relwidth=0.1, relheight=0.2, anchor="n")
+button3.place(relx=0.7, rely=0.7, relwidth=0.1, relheight=0.1, anchor="n")
 
-label2 = tk.Label()
-label2.pack(side="bottom")
+label3 = tk.Label()
+label3.pack(side="bottom")
 root.mainloop()
+
+
+# def print_tweet(stuff):
+#     return 'User: %s \n%s\n\n' %(stuff.author.screen_name, stuff.text)
+#
+#
+# def get_tweet(user):
+#     text.delete('1.0', tk.END)
+#     COUNT=10
+#     auth = tweepy.OAuthHandler("Q4XzAOy6MsUblE5GbVgvcYPmD", "Lhm3Epvi6bJZuGZgbnGtH2fmQhDoFVfCehuh4T4HXsKlQwmI3D")
+#     auth.set_access_token("1152350802880684033-w3NpbaVq39EyMMU4gKknvJUX8EyP8k",
+#                           "QrzLllhCkVAQ0D8nBTOXD9BzYQUls5TDcKgsJ3pgEcezv")
+#     api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
+#     stuff = api.user_timeline(screen_name=user, count=COUNT)
+#     for i in range(COUNT):
+#         text.insert(tk.END, print_tweet(stuff[i]))
