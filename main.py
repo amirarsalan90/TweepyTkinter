@@ -17,7 +17,7 @@ def NextUser():
       username = c.execute("select User from users where rowid = ?",[user_number])
       result = username.fetchall()
       conn.close()
-      label.config(text="user number %d:\n %s"%(user_number,result[0][0]))
+      label1.config(text="user number %d:\n %s" % (user_number, result[0][0]))
       label2.config(text="twitter.com/%s"%result[0][0])
       label2.bind("<Button-1>", lambda e: callback("http://www.twitter.com/%s"%result[0][0]))
 
@@ -34,7 +34,7 @@ def PreviousUser():
       username = c.execute("select User from users where rowid = ?",[user_number])
       result = username.fetchall()
       conn.close()
-      label.config(text="user number %d:\n %s"%(user_number,result[0][0]))
+      label1.config(text="user number %d:\n %s" % (user_number, result[0][0]))
       label2.config(text="twitter.com/%s" % result[0][0])
       label2.bind("<Button-1>", lambda e: callback("http://www.twitter.com/%s" % result[0][0]))
 
@@ -60,6 +60,20 @@ def set_stance(value):
       conn.commit()
       c.close()
 
+def button_zero():
+   global user_number
+   user_number = int(entry1.get())
+   try:
+      conn = sqlite3.connect("users.db")
+      c = conn.cursor()
+      username = c.execute("select User from users where rowid = ?", [user_number])
+      result = username.fetchall()
+      conn.close()
+      label1.config(text="user number %d:\n %s" % (user_number, result[0][0]))
+      label2.config(text="twitter.com/%s" % result[0][0])
+      label2.bind("<Button-1>", lambda e: callback("http://www.twitter.com/%s" % result[0][0]))
+   except:
+      label3.configure(text="User number out of range!")
 
 conn = sqlite3.connect("users.db")
 c = conn.cursor()
@@ -80,8 +94,18 @@ canvas.pack()
 frame = tk.Frame(root)
 frame.place(relx = 0.5, rely = 0, relwidth=1, relheight=1, anchor="n")
 
-label = tk.Label(frame, font=('Helvetica', 15), bg="#99ccff", text="user number 1:\n %s" %initial_text)
-label.place(relx = 0.5, rely = 0.2, relwidth = 0.4, relheight = 0.3, anchor = "n")
+label0 = tk.Label(frame, font=('Helvetica', 12), bg="#BDDCED", text="insert user number: ")
+label0.place(relx = 0.37, rely = 0.06, relwidth = 0.2, relheight = 0.1, anchor = "n")
+
+entry1 = tk.Entry(frame)
+entry1.place(relx = 0.52, rely = 0.06, relwidth = 0.08, relheight = 0.1, anchor = "n")
+entry1.insert(0, "1")
+
+button0 = tk.Button(frame, text="go!", font=('Times', 12), command = lambda: button_zero())
+button0.place(relx = 0.6, rely = 0.06, relwidth = 0.06, relheight = 0.1, anchor = "n")
+
+label1 = tk.Label(frame, font=('Helvetica', 15), bg="#99ccff", text="user number 1:\n %s" % initial_text)
+label1.place(relx = 0.5, rely = 0.2, relwidth = 0.4, relheight = 0.3, anchor ="n")
 
 
 button1 = tk.Button(frame, text="next", font=('Times', 15), command= lambda: NextUser())
