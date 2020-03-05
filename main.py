@@ -15,31 +15,46 @@ def NextUser():
       conn = sqlite3.connect("users.db")
       c = conn.cursor()
       username = c.execute("select User from users where rowid = ?",[user_number])
-      result = username.fetchall()
+      result1 = username.fetchall()
       conn.close()
-      label1.config(text="user number %d:\n %s" % (user_number, result[0][0]))
-      label2.config(text="twitter.com/%s"%result[0][0])
-      label2.bind("<Button-1>", lambda e: callback("http://www.twitter.com/%s"%result[0][0]))
+
+      conn = sqlite3.connect("users.db")
+      c = conn.cursor()
+      a = c.execute("select AntiOrPro from users where rowid = ?", [user_number])
+      result2 = a.fetchall()
+      conn.close()
+
+      label1.config(text="user number %d:\n %s\n\n %s" % (user_number, result1[0][0], result2[0][0]))
+      label2.config(text="twitter.com/%s"%result1[0][0])
+      label2.bind("<Button-1>", lambda e: callback("http://www.twitter.com/%s"%result1[0][0]))
 
    except:
       label3.configure(text="This is the last user! press previous!")
 
 
 def PreviousUser():
-   try:
-      global user_number
-      user_number -= 1
-      conn = sqlite3.connect("users.db")
-      c = conn.cursor()
-      username = c.execute("select User from users where rowid = ?",[user_number])
-      result = username.fetchall()
-      conn.close()
-      label1.config(text="user number %d:\n %s" % (user_number, result[0][0]))
-      label2.config(text="twitter.com/%s" % result[0][0])
-      label2.bind("<Button-1>", lambda e: callback("http://www.twitter.com/%s" % result[0][0]))
+   global user_number
+   if user_number > 1:
+      try:
+         user_number -= 1
+         conn = sqlite3.connect("users.db")
+         c = conn.cursor()
+         username = c.execute("select User from users where rowid = ?",[user_number])
+         result1 = username.fetchall()
+         conn.close()
 
-   except:
-      label3.configure(text="This is the first user! press next!")
+         conn = sqlite3.connect("users.db")
+         c = conn.cursor()
+         a = c.execute("select AntiOrPro from users where rowid = ?", [user_number])
+         result2 = a.fetchall()
+         conn.close()
+
+         label1.config(text="user number %d:\n %s\n\n %s" % (user_number, result1[0][0], result2[0][0]))
+         label2.config(text="twitter.com/%s" % result1[0][0])
+         label2.bind("<Button-1>", lambda e: callback("http://www.twitter.com/%s" % result1[0][0]))
+
+      except:
+         label3.configure(text="error!")
 
 
 
@@ -59,6 +74,27 @@ def set_stance(value):
       c.execute("update users set AntiOrPro=? where rowid = ?", [value, user_number])
       conn.commit()
       c.close()
+   elif value == "Uncertain":
+      conn = sqlite3.connect("users.db")
+      c = conn.cursor()
+      c.execute("update users set AntiOrPro=? where rowid = ?", [value, user_number])
+      conn.commit()
+      c.close()
+
+   conn = sqlite3.connect("users.db")
+   c = conn.cursor()
+   username = c.execute("select User from users where rowid = ?", [user_number])
+   result1 = username.fetchall()
+   conn.close()
+
+   conn = sqlite3.connect("users.db")
+   c = conn.cursor()
+   a = c.execute("select AntiOrPro from users where rowid = ?", [user_number])
+   result2 = a.fetchall()
+   conn.close()
+
+   label1.config(text="user number %d:\n %s\n\n %s" % (user_number, result1[0][0], result2[0][0]))
+
 
 def button_zero():
    global user_number
@@ -67,11 +103,18 @@ def button_zero():
       conn = sqlite3.connect("users.db")
       c = conn.cursor()
       username = c.execute("select User from users where rowid = ?", [user_number])
-      result = username.fetchall()
+      result1 = username.fetchall()
       conn.close()
-      label1.config(text="user number %d:\n %s" % (user_number, result[0][0]))
-      label2.config(text="twitter.com/%s" % result[0][0])
-      label2.bind("<Button-1>", lambda e: callback("http://www.twitter.com/%s" % result[0][0]))
+
+      conn = sqlite3.connect("users.db")
+      c = conn.cursor()
+      a = c.execute("select AntiOrPro from users where rowid = ?", [user_number])
+      result2 = a.fetchall()
+      conn.close()
+
+      label1.config(text="user number %d:\n %s\n\n %s" % (user_number, result1[0][0], result2[0][0]))
+      label2.config(text="twitter.com/%s" % result1[0][0])
+      label2.bind("<Button-1>", lambda e: callback("http://www.twitter.com/%s" % result1[0][0]))
    except:
       label3.configure(text="User number out of range!")
 
@@ -94,7 +137,7 @@ canvas.pack()
 frame = tk.Frame(root)
 frame.place(relx = 0.5, rely = 0, relwidth=1, relheight=1, anchor="n")
 
-label0 = tk.Label(frame, font=('Helvetica', 12), bg="#BDDCED", text="insert user number: ")
+label0 = tk.Label(frame, font=('Helvetica', 12), bg="#BDDCED", text="enter user number:")
 label0.place(relx = 0.37, rely = 0.06, relwidth = 0.2, relheight = 0.1, anchor = "n")
 
 entry1 = tk.Entry(frame)
@@ -121,14 +164,19 @@ label2 = tk.Label(frame, fg="blue", cursor="hand2")
 label2.place(relx=0.5, rely=0.5, relwidth=0.4, relheight=0.09, anchor="n")
 
 R1 = tk.Radiobutton(root, text="Anti-Brexit", font=('Times', 12), variable=var, value="Anti")
-R1.place(relx=0.5, rely=0.7, relwidth=0.15, relheight=0.09, anchor="n")
+R1.place(relx=0.5, rely=0.6, relwidth=0.15, relheight=0.09, anchor="n")
 
 
 R2 = tk.Radiobutton(root, text="Pro-Brexit", font=('Times', 12), variable=var, value="Pro")
-R2.place(relx=0.5, rely=0.8, relwidth=0.15, relheight=0.09, anchor="n")
+R2.place(relx=0.5, rely=0.7, relwidth=0.15, relheight=0.09, anchor="n")
 
-button3 = tk.Button(frame, text="Apply", font=('Times', 13), command=lambda: set_stance(var.get()))
-button3.place(relx=0.7, rely=0.7, relwidth=0.1, relheight=0.1, anchor="n")
+R3 = tk.Radiobutton(root, text="Uncertain", font=('Times', 12), variable=var, value="Uncertain")
+R3.place(relx=0.5, rely=0.8, relwidth=0.15, relheight=0.09, anchor="n")
+
+
+button3 = tk.Button(frame, text="Apply", font=('Times', 12), command=lambda: set_stance(var.get()))
+button3.place(relx=0.7, rely=0.69, relwidth=0.1, relheight=0.1, anchor="n")
+
 
 label3 = tk.Label()
 label3.pack(side="bottom")
